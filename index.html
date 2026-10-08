@@ -9,7 +9,7 @@
 body{margin:0;background:#fff;color:#000;font-family:Arial,"Noto Sans KR",sans-serif}
 .container{max-width:520px;margin:auto;padding:28px 22px;min-height:100vh;display:flex;flex-direction:column}
 
-/* 상단 영역: 날짜 & 시간 크기(26px) 및 두께(900) 상향 조정 */
+/* 상단 영역: 날짜 & 시간 */
 .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:38px}
 .date{font-size:26px;font-weight:900;letter-spacing:normal}
 .time{font-size:26px;font-weight:900;letter-spacing:normal;font-variant-numeric:tabular-nums}
@@ -50,7 +50,7 @@ body{margin:0;background:#fff;color:#000;font-family:Arial,"Noto Sans KR",sans-s
 }
 .reset-btn:active{opacity:0.8}
 
-.list{flex:1}
+.list{display:flex;flex-direction:column}
 .task{display:flex;align-items:center;gap:14px;border-bottom:2px solid #000;padding:17px 4px}
 .task:last-child{border-bottom:none}
 
@@ -59,8 +59,8 @@ body{margin:0;background:#fff;color:#000;font-family:Arial,"Noto Sans KR",sans-s
 .task input[type=text]::placeholder{color:#888}
 .task.done input[type=text]{text-decoration:line-through;color:#888}
 
-/* 하단 문구 위쪽 두꺼운 단일 선 */
-.message{border-top:5px solid #000;margin-top:20px;padding-top:20px;text-align:center;font-size:18px;font-weight:900;line-height:1.2;white-space:nowrap}
+/* 하단 문구 위쪽 두꺼운 선 (할 일 7 바로 아래에 붙도록 수정) */
+.message{border-top:5px solid #000;margin-top:0;padding-top:20px;text-align:center;font-size:18px;font-weight:900;line-height:1.2;white-space:nowrap}
 
 @media(max-width:400px){
 .container{padding:22px 18px}
@@ -196,7 +196,7 @@ function updateProgress(){
 
   document.getElementById("percent").textContent=percent+"%";
   document.getElementById("progressBar").style.width=percent+"%";
-  
+  
   document.getElementById("clear").style.display = (percent === 100) ? "block" : "none";
 }
 
@@ -227,3 +227,4 @@ dailyMessage();
 </script>
 </body>
 </html>
+
