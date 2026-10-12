@@ -114,3 +114,437 @@ body {
 .reset-btn {
   background: #000;
   color: #fff;
+  border: 0;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.reset-btn:active,
+.add-btn:active,
+.page-btn:active {
+  opacity: .7;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 2px solid #000;
+  padding: 17px 4px;
+}
+
+.task:last-child {
+  border-bottom: none;
+}
+
+.task input[type="checkbox"] {
+  width: 25px;
+  height: 25px;
+  accent-color: #000;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.task input[type="text"] {
+  border: 0;
+  outline: 0;
+  width: 100%;
+  min-width: 0;
+  font-size: 21px;
+  color: #000;
+  background: #fff;
+}
+
+.task input[type="text"]::placeholder {
+  color: #888;
+}
+
+.task.done input[type="text"] {
+  text-decoration: line-through;
+  color: #888;
+}
+
+/* 항목 추가 버튼 */
+.add-row {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.add-btn {
+  width: 100%;
+  min-height: 44px;
+  background: #fff;
+  color: #000;
+  border: 2px dashed #bbb;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.add-btn:hover {
+  background: #f7f7f7;
+  border-color: #000;
+}
+
+/* 페이지 이동 */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 4px 0 22px;
+}
+
+.page-btn {
+  background: #fff;
+  color: #000;
+  border: 1px solid #000;
+  border-radius: 4px;
+  min-width: 68px;
+  padding: 8px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.page-btn:disabled {
+  color: #aaa;
+  border-color: #ddd;
+  cursor: default;
+}
+
+.page-info {
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.message {
+  border-top: 5px solid #000;
+  margin-top: 0;
+  padding-top: 20px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+@media(max-width:400px) {
+  .container { padding: 22px 18px; }
+  .date, .time { font-size: 22px; }
+  .greeting { font-size: 16px; }
+  .percent { font-size: 22px; }
+  .task input[type="text"] { font-size: 19px; }
+  .message { font-size: 16px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <div class="top">
+    <div class="date" id="date"></div>
+    <div class="time" id="time"></div>
+  </div>
+
+  <div class="title-row">
+    <div class="greeting">
+      이유민님 오늘 하루도 파이팅입니다.
+    </div>
+    <div class="percent-wrap">
+      <div class="clear" id="clear">Clear!</div>
+      <div class="percent" id="percent">0%</div>
+    </div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <div class="reset-row">
+    <button class="reset-btn" onclick="resetAll()">
+      Reset
+    </button>
+  </div>
+
+  <div class="list" id="list"></div>
+
+  <!-- 항목 추가 -->
+  <div class="add-row">
+    <button class="add-btn" onclick="addTask()">
+      + 항목 추가
+    </button>
+  </div>
+
+  <!-- 페이지 이동 -->
+  <div class="pagination" id="pagination">
+    <button class="page-btn" id="prevBtn"
+            onclick="changePage(-1)">
+      ← 이전
+    </button>
+
+    <div class="page-info" id="pageInfo">1 / 1</div>
+
+    <button class="page-btn" id="nextBtn"
+            onclick="changePage(1)">
+      다음 →
+    </button>
+  </div>
+
+  <div class="message" id="message"></div>
+
+</div>
+
+<script>
+const STORAGE_KEY = "yumin_todo_list_v3";
+const PAGE_SIZE = 7;
+
+let tasks = [];
+let currentPage = 1;
+
+const messages = [
+  "오늘 한 일이 내일의 나를 만든다.",
+  "자존감은 내가 한 약속을 지키는 것에서 온다.",
+  "계속하면 결국 원하는 곳에 도착한다.",
+  "오늘 할 일을 내일 할 일이 아니다.",
+  "미래의 나에게 가장 좋은 선물은 오늘의 실행이다.",
+  "그냥 해라.",
+  "이제는 천천히 가면 큰일 난다.",
+  "뭐가 제일 우선인지 잊지 마라.",
+  "너 졸업할 거냐?",
+  "지금의 한 걸음이 원하는 미래와 가장 가깝다.",
+  "어설프게 공부하고 나에게 취하지 말자.",
+  "원래 공부=멘헤라는 항등식이다."
+];
+
+function updateDateTime() {
+  const d = new Date();
+  const days = ["일", "월", "화", "수", "목", "금", "토"];
+
+  document.getElementById("date").textContent =
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+
+  document.getElementById("time").textContent =
+    d.toLocaleTimeString("ko-KR", { hour12: false });
+}
+
+/* 전체 페이지 수 */
+function getTotalPages() {
+  return Math.max(1, Math.ceil(tasks.length / PAGE_SIZE));
+}
+
+/* 기존 저장 데이터 불러오기 */
+function load() {
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) || "null"
+    );
+
+    if (Array.isArray(saved) && saved.length > 0) {
+      tasks = saved.map(task => {
+        if (typeof task === "object" && task !== null) {
+          return {
+            text: task.text || "",
+            done: Boolean(task.done)
+          };
+        }
+
+        // 기존 버전의 문자열 데이터도 호환
+        return {
+          text: typeof task === "string" ? task : "",
+          done: false
+        };
+      });
+    } else {
+      tasks = Array.from({ length: 7 }, () => ({
+        text: "",
+        done: false
+      }));
+    }
+  } catch (error) {
+    tasks = Array.from({ length: 7 }, () => ({
+      text: "",
+      done: false
+    }));
+  }
+
+  renderTasks();
+}
+
+/* 모든 항목 저장 */
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  updateProgress();
+}
+
+/* 현재 페이지의 항목만 표시 */
+function renderTasks() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const end = Math.min(start + PAGE_SIZE, tasks.length);
+
+  for (let i = start; i < end; i++) {
+    createTask(i);
+  }
+
+  updatePagination();
+  updateProgress();
+}
+
+/* 할 일 한 칸 생성 */
+function createTask(index) {
+  const task = tasks[index];
+
+  const row = document.createElement("div");
+  row.className = "task" + (task.done ? " done" : "");
+
+  const check = document.createElement("input");
+  check.type = "checkbox";
+  check.checked = task.done;
+  check.setAttribute("aria-label", `할 일 ${index + 1} 완료`);
+
+  const input = document.createElement("input");
+  input.type = "text";
+  input.placeholder = `할 일 ${index + 1}`;
+  input.value = task.text;
+  input.setAttribute("aria-label", `할 일 ${index + 1} 내용`);
+
+  check.addEventListener("change", () => {
+    tasks[index].done = check.checked;
+    row.classList.toggle("done", check.checked);
+    save();
+  });
+
+  input.addEventListener("input", () => {
+    tasks[index].text = input.value;
+    save();
+  });
+
+  row.append(check, input);
+  document.getElementById("list").appendChild(row);
+}
+
+/* 새 항목 추가 */
+function addTask() {
+  tasks.push({
+    text: "",
+    done: false
+  });
+
+  // 새 항목이 있는 마지막 페이지로 이동
+  currentPage = getTotalPages();
+
+  save();
+  renderTasks();
+
+  // 새로 추가한 입력칸에 바로 입력할 수 있게 포커스
+  const inputs = document.querySelectorAll(
+    '.task input[type="text"]'
+  );
+
+  if (inputs.length > 0) {
+    inputs[inputs.length - 1].focus();
+  }
+}
+
+/* 페이지 이동 */
+function changePage(direction) {
+  const nextPage = currentPage + direction;
+
+  if (nextPage < 1 || nextPage > getTotalPages()) {
+    return;
+  }
+
+  currentPage = nextPage;
+  renderTasks();
+}
+
+/* 페이지 번호와 버튼 상태 */
+function updatePagination() {
+  const totalPages = getTotalPages();
+
+  document.getElementById("pageInfo").textContent =
+    `${currentPage} / ${totalPages}`;
+
+  document.getElementById("prevBtn").disabled =
+    currentPage <= 1;
+
+  document.getElementById("nextBtn").disabled =
+    currentPage >= totalPages;
+
+  document.getElementById("pagination").style.display =
+    totalPages > 1 ? "flex" : "none";
+}
+
+/* 전체 항목 기준 달성률 */
+function updateProgress() {
+  const completed = tasks.filter(task => task.done).length;
+  const percent = tasks.length
+    ? Math.round((completed / tasks.length) * 100)
+    : 0;
+
+  document.getElementById("percent").textContent =
+    percent + "%";
+
+  document.getElementById("progressBar").style.width =
+    percent + "%";
+
+  document.getElementById("clear").style.display =
+    percent === 100 && tasks.length > 0 ? "block" : "none";
+}
+
+/* 모든 페이지의 내용과 체크 상태 초기화
+   항목 개수는 유지 */
+function resetAll() {
+  if (confirm("모든 할 일 목록을 초기화하시겠습니까?")) {
+    tasks = tasks.map(() => ({
+      text: "",
+      done: false
+    }));
+
+    currentPage = 1;
+    save();
+    renderTasks();
+  }
+}
+
+/* 날짜에 따라 응원 문구 변경 */
+function dailyMessage() {
+  const start = new Date(2026, 0, 1);
+  const now = new Date();
+
+  const day = Math.floor(
+    (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
+     start) / 86400000
+  );
+
+  const index =
+    ((day % messages.length) + messages.length) % messages.length;
+
+  document.getElementById("message").textContent =
+    "“" + messages[index] + "”";
+}
+
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
+load();
+dailyMessage();
+</script>
+
+</body>
+</html>
