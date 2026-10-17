@@ -44,6 +44,8 @@ button:disabled{opacity:.3;cursor:default}
 .subtask input[type=text]{min-width:0;flex:1;border:0;border-bottom:1px solid #ddd;padding:4px;background:#fff;font-size:14px}
 .subtask.done input[type=text]{text-decoration:line-through;color:#888}
 .delete-sub{border:0;background:#fff;color:#777;font-size:17px;padding:0 4px}
+.add-sub-row{margin-top:6px;padding-top:4px}
+.add-sub-btn{background:none;border:none;color:#555;font-size:13px;padding:2px 0;text-decoration:underline;cursor:pointer}
 .add-row{padding:15px 0}
 .add-btn{width:100%;padding:13px;background:#fff;border:2px dashed #aaa;border-radius:5px;font-weight:bold}
 .pagination{justify-content:center;padding:5px 0 20px}
@@ -237,6 +239,27 @@ function render(){
   updateProgress();
 }
 
+function addSubtask(task, focusNew=true){
+  const newSub={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+    text:"",
+    done:false
+  };
+  task.subtasks.push(newSub);
+  task.done=false;
+  openSubtasks.add(task.id);
+  persist();
+  render();
+
+  if(focusNew){
+    setTimeout(()=>{
+      const newInput=[...document.querySelectorAll(".subtask input[type=text]")]
+        .find(input=>input.dataset.subtaskId===newSub.id);
+      if(newInput) newInput.focus();
+    },10);
+  }
+}
+
 function renderTask(task,index,list){
   const row=document.createElement("div");
   row.className="task"+(task.done?" done":"");
@@ -276,11 +299,16 @@ function renderTask(task,index,list){
   const subBtn=document.createElement("button");
   subBtn.className="btn-light sub-toggle-btn";
   subBtn.textContent=`＋ 세부 할 일 (${task.subtasks.length})`;
+  
   subBtn.addEventListener("click",()=>{
-    if(openSubtasks.has(task.id)){
-      openSubtasks.delete(task.id);
-    }else{
+    if(!openSubtasks.has(task.id)){
       openSubtasks.add(task.id);
+      if(task.subtasks.length===0){
+        addSubtask(task, true);
+        return;
+      }
+    }else{
+      openSubtasks.delete(task.id);
     }
     render();
   });
@@ -319,29 +347,7 @@ function renderTask(task,index,list){
     subText.addEventListener("keydown",e=>{
       if(e.key!=="Enter") return;
       e.preventDefault();
-
-      const newSub={
-        id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
-        text:"",
-        done:false
-      };
-
-      const subIndex=task.subtasks.findIndex(s=>s.id===sub.id);
-      task.subtasks.splice(subIndex+1,0,newSub);
-
-      task.done=false;
-      check.checked=false;
-      row.classList.remove("done");
-
-      openSubtasks.add(task.id);
-
-      persist();
-      render();
-
-      const newInput=[...document.querySelectorAll(".subtask input[type=text]")]
-        .find(input=>input.dataset.subtaskId===newSub.id);
-
-      if(newInput) newInput.focus();
+      addSubtask(task, true);
     });
 
     subCheck.addEventListener("change",()=>{
@@ -380,6 +386,17 @@ function renderTask(task,index,list){
     subRow.append(subCheck,subText,del);
     subList.append(subRow);
   });
+
+  const addSubRow=document.createElement("div");
+  addSubRow.className="add-sub-row";
+  const addSubBtnLink=document.createElement("button");
+  addSubBtnLink.className="add-sub-btn";
+  addSubBtnLink.textContent="＋ 세부 항목 추가";
+  addSubBtnLink.addEventListener("click",()=>{
+    addSubtask(task, true);
+  });
+  addSubRow.append(addSubBtnLink);
+  subList.append(addSubRow);
 
   row.append(subList);
   list.append(row);
@@ -430,125 +447,4 @@ function goToday(){
 
 function setDate(date){
   if(!date)return;
-  currentDate=date;
-  currentPage=1;
-  openSubtasks.clear();
-  if(!db.days[currentDate])db.days[currentDate]=[];
-  document.getElementById("selectedDate").value=currentDate;
-  render();
-}
-
-document.getElementById("selectedDate").addEventListener("change",e=>{
-  setDate(e.target.value);
-});
-
-function resetDay(){
-  if(confirm("선택한 날짜의 모든 할 일을 초기화할까요?")){
-    db.days[currentDate]=Array.from({length:PAGE_SIZE},()=>makeTask());
-    currentPage=1;
-    openSubtasks.clear();
-    persist();
-    render();
-  }
-}
-
-async function enableNotifications(){
-  if(!("Notification" in window)){
-    alert("이 브라우저에서는 알림을 지원하지 않아요.");
-    return;
-  }
-  try{
-    const permission=await Notification.requestPermission();
-    alert(permission==="granted"
-      ?"알림이 허용됐어요. 웹앱이 열려 있을 때 마감 시간을 확인합니다."
-      :"알림이 허용되지 않았어요. 브라우저 설정을 확인해 주세요.");
-  }catch(e){
-    alert("알림 권한을 설정할 수 없어요. HTTPS 주소에서 열어 주세요.");
-  }
-}
-
-function checkDeadlines(){
-  if(!("Notification" in window)||Notification.permission!=="granted")return;
-  const now=Date.now();
-  let changed=false;
-
-  Object.entries(db.days).forEach(([date,tasks])=>{
-    tasks.forEach(task=>{
-      if(task.done||!task.due||task.notified)return;
-      const dueTime=new Date(task.due).getTime();
-      if(Number.isFinite(dueTime)&&dueTime<=now){
-        try{
-          new Notification("할 일 마감 알림",{
-            body:`${task.text||"할 일"} (${date})`,
-            tag:"todo-"+task.id
-          });
-          task.notified=true;
-          changed=true;
-        }catch(e){}
-      }
-    });
-  });
-
-  if(changed){
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db));}catch(e){}
-  }
-}
-
-function exportBackup(){
-  try{
-    const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement("a");
-    a.href=url;
-    a.download=`yumin-todo-backup-${localDate(new Date())}.json`;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),1000);
-  }catch(e){
-    alert("백업 파일을 만들지 못했어요.");
-  }
-}
-
-document.getElementById("backupFile").addEventListener("change",async e=>{
-  const file=e.target.files[0];
-  if(!file)return;
-
-  try{
-    const imported=JSON.parse(await file.text());
-    if(!imported||!imported.days||typeof imported.days!=="object"||Array.isArray(imported.days)){
-      throw new Error("잘못된 백업 형식");
-    }
-
-    if(!confirm("현재 데이터를 백업 파일의 데이터로 교체할까요? 먼저 현재 데이터를 백업하는 것을 권장해요.")){
-      e.target.value="";
-      return;
-    }
-
-    const newDays={};
-    Object.entries(imported.days).forEach(([date,tasks])=>{
-      if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&Array.isArray(tasks)){
-        newDays[date]=tasks.map(makeTask);
-      }
-    });
-
-    db={version:4,days:newDays};
-    if(!db.days[currentDate])db.days[currentDate]=[];
-    currentPage=1;
-    openSubtasks.clear();
-    persist();
-    render();
-    alert("백업 데이터를 복구했어요.");
-  }catch(err){
-    alert("백업 파일을 읽지 못했어요. 올바른 JSON 파일인지 확인해 주세요.");
-  }
-  e.target.value="";
-});
-
-updateClock();
-setInterval(updateClock,1000);
-load();
-updateMessage();
-checkDeadlines();
-setInterval(checkDeadlines,15000);
-</script>
-</body>
-</html>
+  currentDate
