@@ -1,550 +1,526 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이유민 TO-DO LIST</title>
-
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="이유민 TO-DO">
-
-<link rel="apple-touch-icon"
-href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23000'/%3E%3Cpath d='M28 50 L42 64 L72 34' stroke='%23fff' stroke-width='10' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E">
-
+<title>이유민 TO-DO LIST</title>
 <style>
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: #fff;
-  color: #000;
-  font-family: Arial, "Noto Sans KR", sans-serif;
-}
-
-.container {
-  max-width: 520px;
-  margin: auto;
-  padding: 28px 22px;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-.top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 38px;
-}
-
-.date, .time {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: normal;
-}
-
-.time {
-  font-variant-numeric: tabular-nums;
-}
-
-.title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin: 0 0 28px;
-}
-
-.greeting {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0;
-  line-height: 1.3;
-  color: #222;
-}
-
-.percent-wrap {
-  position: relative;
-  text-align: right;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-}
-
-.clear {
-  position: absolute;
-  bottom: 100%;
-  right: 0;
-  font-size: 12px;
-  font-weight: bold;
-  margin-bottom: 4px;
-  white-space: nowrap;
-  display: none;
-}
-
-.percent {
-  font-size: 26px;
-  font-weight: bold;
-  line-height: 1;
-}
-
-.progress {
-  height: 8px;
-  background: #eee;
-  margin-top: -18px;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  width: 0;
-  background: #000;
-  transition: width .3s ease;
-}
-
-.reset-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 12px;
-}
-
-.reset-btn {
-  background: #000;
-  color: #fff;
-  border: 0;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: bold;
-  border-radius: 4px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.reset-btn:active,
-.add-btn:active,
-.page-btn:active {
-  opacity: .7;
-}
-
-.list {
-  display: flex;
-  flex-direction: column;
-}
-
-.task {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  border-bottom: 2px solid #000;
-  padding: 17px 4px;
-}
-
-.task:last-child {
-  border-bottom: none;
-}
-
-.task input[type="checkbox"] {
-  width: 25px;
-  height: 25px;
-  accent-color: #000;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.task input[type="text"] {
-  border: 0;
-  outline: 0;
-  width: 100%;
-  min-width: 0;
-  font-size: 21px;
-  color: #000;
-  background: #fff;
-}
-
-.task input[type="text"]::placeholder {
-  color: #888;
-}
-
-.task.done input[type="text"] {
-  text-decoration: line-through;
-  color: #888;
-}
-
-/* 항목 추가 버튼 */
-.add-row {
-  display: flex;
-  justify-content: center;
-  padding: 16px 0;
-}
-
-.add-btn {
-  width: 100%;
-  min-height: 44px;
-  background: #fff;
-  color: #000;
-  border: 2px dashed #bbb;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.add-btn:hover {
-  background: #f7f7f7;
-  border-color: #000;
-}
-
-/* 페이지 이동 */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  padding: 4px 0 22px;
-}
-
-.page-btn {
-  background: #fff;
-  color: #000;
-  border: 1px solid #000;
-  border-radius: 4px;
-  min-width: 68px;
-  padding: 8px 10px;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-.page-btn:disabled {
-  color: #aaa;
-  border-color: #ddd;
-  cursor: default;
-}
-
-.page-info {
-  font-size: 14px;
-  font-weight: bold;
-  white-space: nowrap;
-}
-
-.message {
-  border-top: 5px solid #000;
-  margin-top: 0;
-  padding-top: 20px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: 900;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-
-@media(max-width:400px) {
-  .container { padding: 22px 18px; }
-  .date, .time { font-size: 22px; }
-  .greeting { font-size: 16px; }
-  .percent { font-size: 22px; }
-  .task input[type="text"] { font-size: 19px; }
-  .message { font-size: 16px; }
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:#000;font-family:Arial,"Noto Sans KR",sans-serif}
+.container{max-width:520px;margin:auto;padding:25px 20px;min-height:100vh}
+.top,.title-row,.date-row,.pagination,.button-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.top{margin-bottom:30px}
+.date,.time{font-size:22px;font-weight:900}
+.title-row{margin-bottom:22px}
+.greeting{font-size:16px;color:#222}
+.percent{font-size:25px;font-weight:bold}
+.clear{display:none;font-size:12px;font-weight:bold;text-align:right}
+.progress{height:8px;background:#eee;margin-bottom:14px;overflow:hidden}
+.progress-bar{height:100%;width:0;background:#000;transition:width .2s}
+button,input{font:inherit}
+button{cursor:pointer}
+button:disabled{opacity:.3;cursor:default}
+.btn{background:#000;color:#fff;border:1px solid #000;padding:9px 12px;border-radius:5px;font-size:13px}
+.btn-light{background:#fff;color:#000;border:1px solid #000;padding:8px 10px;border-radius:5px;font-size:13px}
+.button-row{justify-content:flex-end;flex-wrap:wrap;margin-bottom:15px}
+.date-row{margin-bottom:20px;gap:6px}
+.date-row input{min-width:0;width:100%;border:1px solid #aaa;padding:9px;border-radius:4px}
+.date-row button{flex-shrink:0}
+.list{display:flex;flex-direction:column}
+.task{border-bottom:2px solid #000;padding:15px 3px}
+.task-main{display:flex;align-items:center;gap:12px}
+.task input[type=checkbox]{width:22px;height:22px;accent-color:#000;flex-shrink:0}
+.task-title{min-width:0;flex:1;border:0;outline:0;font-size:19px;background:#fff;color:#000}
+.task.done .task-title{text-decoration:line-through;color:#888}
+.task-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 0 34px}
+.due{font-size:12px;border:0;border-bottom:1px solid #aaa;padding:5px 0;background:#fff;max-width:100%}
+.subtasks{margin:10px 0 0 34px;padding-left:10px;border-left:2px solid #ddd}
+.subtask{display:flex;align-items:center;gap:8px;padding:6px 0}
+.subtask input[type=text]{min-width:0;flex:1;border:0;border-bottom:1px solid #ddd;padding:5px;background:#fff;font-size:14px}
+.subtask.done input[type=text]{text-decoration:line-through;color:#888}
+.delete-sub{border:0;background:#fff;color:#777;font-size:17px}
+.add-row{padding:15px 0}
+.add-btn{width:100%;padding:13px;background:#fff;border:2px dashed #aaa;border-radius:5px;font-weight:bold}
+.pagination{justify-content:center;padding:5px 0 20px}
+.page-info{font-weight:bold;font-size:14px}
+.message{border-top:5px solid #000;padding-top:20px;text-align:center;font-size:17px;font-weight:900;line-height:1.5;overflow-wrap:anywhere}
+.note{font-size:12px;color:#666;line-height:1.6;margin-top:15px}
+.file-input{display:none}
+@media(max-width:400px){
+.container{padding:20px 16px}
+.date,.time{font-size:19px}
+.greeting{font-size:14px}
+.task-title{font-size:17px}
 }
 </style>
 </head>
-
 <body>
 <div class="container">
-
   <div class="top">
-    <div class="date" id="date"></div>
-    <div class="time" id="time"></div>
+    <div class="date" id="dateText"></div>
+    <div class="time" id="timeText"></div>
   </div>
 
   <div class="title-row">
-    <div class="greeting">
-      이유민님 오늘 하루도 파이팅입니다.
-    </div>
-    <div class="percent-wrap">
+    <div class="greeting">이유민님 오늘 하루도 파이팅입니다.</div>
+    <div style="text-align:right">
       <div class="clear" id="clear">Clear!</div>
       <div class="percent" id="percent">0%</div>
     </div>
   </div>
 
-  <div class="progress">
-    <div class="progress-bar" id="progressBar"></div>
+  <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+  <div class="button-row">
+    <button class="btn-light" onclick="enableNotifications()">알림 허용</button>
+    <button class="btn-light" onclick="exportBackup()">백업 저장</button>
+    <button class="btn-light" onclick="document.getElementById('backupFile').click()">백업 복구</button>
+    <button class="btn" onclick="resetDay()">Reset</button>
+    <input class="file-input" id="backupFile" type="file" accept=".json,application/json">
   </div>
 
-  <div class="reset-row">
-    <button class="reset-btn" onclick="resetAll()">
-      Reset
-    </button>
+  <div class="date-row">
+    <button class="btn-light" onclick="moveDate(-1)">←</button>
+    <input id="selectedDate" type="date" aria-label="일정 날짜">
+    <button class="btn-light" onclick="moveDate(1)">→</button>
+    <button class="btn-light" onclick="goToday()">오늘</button>
   </div>
 
   <div class="list" id="list"></div>
 
-  <!-- 항목 추가 -->
   <div class="add-row">
-    <button class="add-btn" onclick="addTask()">
-      + 항목 추가
-    </button>
+    <button class="add-btn" onclick="addTask()">＋ 항목 추가</button>
   </div>
 
-  <!-- 페이지 이동 -->
   <div class="pagination" id="pagination">
-    <button class="page-btn" id="prevBtn"
-            onclick="changePage(-1)">
-      ← 이전
-    </button>
-
-    <div class="page-info" id="pageInfo">1 / 1</div>
-
-    <button class="page-btn" id="nextBtn"
-            onclick="changePage(1)">
-      다음 →
-    </button>
+    <button class="btn-light" id="prevBtn" onclick="changePage(-1)">← 이전</button>
+    <span class="page-info" id="pageInfo">1 / 1</span>
+    <button class="btn-light" id="nextBtn" onclick="changePage(1)">다음 →</button>
   </div>
 
   <div class="message" id="message"></div>
-
+  <div class="note">
+    일정은 이 브라우저에 자동 저장됩니다. 정기적으로 백업 파일을 저장해 주세요.
+    알림은 웹앱이 열려 있는 동안 확인됩니다.
+  </div>
 </div>
 
 <script>
-const STORAGE_KEY = "yumin_todo_list_v3";
-const PAGE_SIZE = 7;
+const STORAGE_KEY="yumin_todo_list_v4";
+const OLD_KEY="yumin_todo_list_v3";
+const PAGE_SIZE=7;
 
-let tasks = [];
-let currentPage = 1;
+let db={version:4,days:{}};
+let currentDate=localDate(new Date());
+let currentPage=1;
 
-const messages = [
-  "오늘 한 일이 내일의 나를 만든다.",
-  "자존감은 내가 한 약속을 지키는 것에서 온다.",
-  "계속하면 결국 원하는 곳에 도착한다.",
-  "오늘 할 일을 내일 할 일이 아니다.",
-  "미래의 나에게 가장 좋은 선물은 오늘의 실행이다.",
-  "그냥 해라.",
-  "이제는 천천히 가면 큰일 난다.",
-  "뭐가 제일 우선인지 잊지 마라.",
-  "너 졸업할 거냐?",
-  "지금의 한 걸음이 원하는 미래와 가장 가깝다.",
-  "어설프게 공부하고 나에게 취하지 말자.",
-  "원래 공부=멘헤라는 항등식이다."
+const messages=[
+"오늘 한 일이 내일의 나를 만든다.",
+"자존감은 내가 한 약속을 지키는 것에서 온다.",
+"계속하면 결국 원하는 곳에 도착한다.",
+"오늘 할 일을 내일 할 일이 아니다.",
+"미래의 나에게 가장 좋은 선물은 오늘의 실행이다.",
+"그냥 해라.",
+"이제는 천천히 가면 큰일 난다.",
+"뭐가 제일 우선인지 잊지 마라.",
+"너 졸업할 거냐?",
+"지금의 한 걸음이 원하는 미래와 가장 가깝다.",
+"어설프게 공부하고 나에게 취하지 말자.",
+"원래 공부=멘헤라는 항등식이다."
 ];
 
-function updateDateTime() {
-  const d = new Date();
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
-
-  document.getElementById("date").textContent =
-    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
-
-  document.getElementById("time").textContent =
-    d.toLocaleTimeString("ko-KR", { hour12: false });
+function localDate(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
 }
 
-/* 전체 페이지 수 */
-function getTotalPages() {
-  return Math.max(1, Math.ceil(tasks.length / PAGE_SIZE));
+function makeTask(task={}){
+  return {
+    id:task.id||(Date.now().toString(36)+Math.random().toString(36).slice(2,8)),
+    text:typeof task.text==="string"?task.text:"",
+    done:Boolean(task.done),
+    due:typeof task.due==="string"?task.due:"",
+    notified:Boolean(task.notified),
+    subtasks:Array.isArray(task.subtasks)?task.subtasks.map(s=>({
+      id:s.id||(Date.now().toString(36)+Math.random().toString(36).slice(2,7)),
+      text:typeof s.text==="string"?s.text:"",
+      done:Boolean(s.done)
+    })):[]
+  };
 }
 
-/* 기존 저장 데이터 불러오기 */
-function load() {
-  try {
-    const saved = JSON.parse(
-      localStorage.getItem(STORAGE_KEY) || "null"
-    );
+function getTasks(){
+  if(!Array.isArray(db.days[currentDate]))db.days[currentDate]=[];
+  return db.days[currentDate];
+}
 
-    if (Array.isArray(saved) && saved.length > 0) {
-      tasks = saved.map(task => {
-        if (typeof task === "object" && task !== null) {
-          return {
-            text: task.text || "",
-            done: Boolean(task.done)
-          };
-        }
+function persist(){
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(db));
+  }catch(e){
+    alert("저장 공간이 부족할 수 있어요. 백업 파일을 저장해 주세요.");
+  }
+  updateProgress();
+}
 
-        // 기존 버전의 문자열 데이터도 호환
-        return {
-          text: typeof task === "string" ? task : "",
-          done: false
-        };
-      });
-    } else {
-      tasks = Array.from({ length: 7 }, () => ({
-        text: "",
-        done: false
-      }));
+function load(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null");
+    if(saved&&saved.days&&typeof saved.days==="object"){
+      db=saved;
+    }else{
+      const old=JSON.parse(localStorage.getItem(OLD_KEY)||"null");
+      const tasks=Array.isArray(old)?old:[];
+      db={version:4,days:{}};
+      db.days[currentDate]=tasks.map(t=>makeTask(typeof t==="string"?{text:t}:t));
+      if(!db.days[currentDate].length){
+        db.days[currentDate]=Array.from({length:7},()=>makeTask());
+      }
+      persist();
     }
-  } catch (error) {
-    tasks = Array.from({ length: 7 }, () => ({
-      text: "",
-      done: false
-    }));
+  }catch(e){
+    db={version:4,days:{}};
+    db.days[currentDate]=Array.from({length:7},()=>makeTask());
   }
 
-  renderTasks();
+  if(!db.days[currentDate]){
+    db.days[currentDate]=Array.from({length:7},()=>makeTask());
+  }
+  document.getElementById("selectedDate").value=currentDate;
+  render();
 }
 
-/* 모든 항목 저장 */
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+function updateClock(){
+  const d=new Date();
+  const days=["일","월","화","수","목","금","토"];
+  document.getElementById("dateText").textContent=
+    `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+  document.getElementById("timeText").textContent=
+    d.toLocaleTimeString("ko-KR",{hour12:false});
+}
+
+function updateMessage(){
+  const start=new Date(2026,0,1);
+  const today=new Date();
+  const day=Math.floor((new Date(today.getFullYear(),today.getMonth(),today.getDate())-start)/86400000);
+  const i=((day%messages.length)+messages.length)%messages.length;
+  document.getElementById("message").textContent="“"+messages[i]+"”";
+}
+
+function render(){
+  const list=document.getElementById("list");
+  list.innerHTML="";
+  const tasks=getTasks();
+  const totalPages=Math.max(1,Math.ceil(tasks.length/PAGE_SIZE));
+  currentPage=Math.min(currentPage,totalPages);
+  const start=(currentPage-1)*PAGE_SIZE;
+
+  tasks.slice(start,start+PAGE_SIZE).forEach((task,index)=>{
+    renderTask(task,start+index,list);
+  });
+
+  document.getElementById("pageInfo").textContent=`${currentPage} / ${totalPages}`;
+  document.getElementById("prevBtn").disabled=currentPage<=1;
+  document.getElementById("nextBtn").disabled=currentPage>=totalPages;
+  document.getElementById("pagination").style.display=totalPages>1?"flex":"none";
   updateProgress();
 }
 
-/* 현재 페이지의 항목만 표시 */
-function renderTasks() {
-  const list = document.getElementById("list");
-  list.innerHTML = "";
+function renderTask(task,index,list){
+  const row=document.createElement("div");
+  row.className="task"+(task.done?" done":"");
 
-  const start = (currentPage - 1) * PAGE_SIZE;
-  const end = Math.min(start + PAGE_SIZE, tasks.length);
+  const main=document.createElement("div");
+  main.className="task-main";
 
-  for (let i = start; i < end; i++) {
-    createTask(i);
+  const check=document.createElement("input");
+  check.type="checkbox";
+  check.checked=task.done;
+  check.setAttribute("aria-label","할 일 완료");
+
+  const title=document.createElement("input");
+  title.type="text";
+  title.className="task-title";
+  title.placeholder=`할 일 ${index+1}`;
+  title.value=task.text;
+
+  check.addEventListener("change",()=>{
+    const writtenSubtasks=task.subtasks.filter(s=>s.text.trim()!=="");
+    if(check.checked&&writtenSubtasks.some(s=>!s.done)){
+      alert("세부 할 일을 모두 완료해야 상위 할 일을 완료할 수 있어요.");
+      check.checked=false;
+      task.done=false;
+    }else{
+      task.done=check.checked;
+    }
+    row.classList.toggle("done",task.done);
+    persist();
+  });
+
+  title.addEventListener("input",()=>{
+    task.text=title.value;
+    persist();
+  });
+
+  main.append(check,title);
+  row.append(main);
+
+  const tools=document.createElement("div");
+  tools.className="task-tools";
+
+  const due=document.createElement("input");
+  due.type="datetime-local";
+  due.className="due";
+  due.value=task.due;
+  due.title="마감 날짜와 시간";
+  due.addEventListener("change",()=>{
+    task.due=due.value;
+    task.notified=false;
+    persist();
+  });
+
+  const subBtn=document.createElement("button");
+  subBtn.className="btn-light";
+  subBtn.textContent=`＋ 세부 할 일 (${task.subtasks.length})`;
+  subBtn.addEventListener("click",()=>{
+    task.subtasks.push({
+      id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+      text:"",
+      done:false
+    });
+    persist();
+    render();
+  });
+
+  tools.append(due,subBtn);
+  row.append(tools);
+
+  if(task.subtasks.length){
+    const subList=document.createElement("div");
+    subList.className="subtasks";
+
+    task.subtasks.forEach(sub=>{
+      const subRow=document.createElement("div");
+      subRow.className="subtask"+(sub.done?" done":"");
+
+      const subCheck=document.createElement("input");
+      subCheck.type="checkbox";
+      subCheck.checked=sub.done;
+
+      const subText=document.createElement("input");
+      subText.type="text";
+      subText.placeholder="세부 할 일 입력";
+      subText.value=sub.text;
+
+      subCheck.addEventListener("change",()=>{
+        sub.done=subCheck.checked;
+        subRow.classList.toggle("done",sub.done);
+
+        const writtenSubtasks=task.subtasks.filter(s=>s.text.trim()!=="");
+        if(writtenSubtasks.some(s=>!s.done)){
+          task.done=false;
+          check.checked=false;
+          row.classList.remove("done");
+        }
+        persist();
+      });
+
+      subText.addEventListener("input",()=>{
+        sub.text=subText.value;
+        task.done=false;
+        check.checked=false;
+        row.classList.remove("done");
+        persist();
+      });
+
+      const del=document.createElement("button");
+      del.className="delete-sub";
+      del.textContent="×";
+      del.title="세부 할 일 삭제";
+      del.addEventListener("click",()=>{
+        if(confirm("이 세부 할 일을 삭제할까요?")){
+          task.subtasks=task.subtasks.filter(s=>s.id!==sub.id);
+          persist();
+          render();
+        }
+      });
+
+      subRow.append(subCheck,subText,del);
+      subList.append(subRow);
+    });
+    row.append(subList);
   }
 
-  updatePagination();
-  updateProgress();
+  list.append(row);
 }
 
-/* 할 일 한 칸 생성 */
-function createTask(index) {
-  const task = tasks[index];
-
-  const row = document.createElement("div");
-  row.className = "task" + (task.done ? " done" : "");
-
-  const check = document.createElement("input");
-  check.type = "checkbox";
-  check.checked = task.done;
-  check.setAttribute("aria-label", `할 일 ${index + 1} 완료`);
-
-  const input = document.createElement("input");
-  input.type = "text";
-  input.placeholder = `할 일 ${index + 1}`;
-  input.value = task.text;
-  input.setAttribute("aria-label", `할 일 ${index + 1} 내용`);
-
-  check.addEventListener("change", () => {
-    tasks[index].done = check.checked;
-    row.classList.toggle("done", check.checked);
-    save();
-  });
-
-  input.addEventListener("input", () => {
-    tasks[index].text = input.value;
-    save();
-  });
-
-  row.append(check, input);
-  document.getElementById("list").appendChild(row);
+function addTask(){
+  const tasks=getTasks();
+  tasks.push(makeTask());
+  currentPage=Math.ceil(tasks.length/PAGE_SIZE);
+  persist();
+  render();
+  const inputs=document.querySelectorAll(".task-title");
+  if(inputs.length)inputs[inputs.length-1].focus();
 }
 
-/* 새 항목 추가 */
-function addTask() {
-  tasks.push({
-    text: "",
-    done: false
-  });
+function changePage(n){
+  const total=Math.max(1,Math.ceil(getTasks().length/PAGE_SIZE));
+  currentPage=Math.max(1,Math.min(total,currentPage+n));
+  render();
+}
 
-  // 새 항목이 있는 마지막 페이지로 이동
-  currentPage = getTotalPages();
+// 빈 상위 할 일은 제외하고, 입력된 세부 할 일까지 완료해야 완료로 계산
+function isTaskComplete(task){
+  const writtenSubtasks=task.subtasks.filter(s=>s.text.trim()!=="");
+  return task.done&&writtenSubtasks.every(s=>s.done);
+}
 
-  save();
-  renderTasks();
+function updateProgress(){
+  const writtenTasks=getTasks().filter(t=>t.text.trim()!=="");
+  const completed=writtenTasks.filter(isTaskComplete).length;
+  const percent=writtenTasks.length?Math.round(completed/writtenTasks.length*100):0;
 
-  // 새로 추가한 입력칸에 바로 입력할 수 있게 포커스
-  const inputs = document.querySelectorAll(
-    '.task input[type="text"]'
-  );
+  document.getElementById("percent").textContent=percent+"%";
+  document.getElementById("progressBar").style.width=percent+"%";
+  document.getElementById("clear").style.display=
+    writtenTasks.length>0&&percent===100?"block":"none";
+}
 
-  if (inputs.length > 0) {
-    inputs[inputs.length - 1].focus();
+function moveDate(n){
+  const d=new Date(currentDate+"T12:00:00");
+  d.setDate(d.getDate()+n);
+  setDate(localDate(d));
+}
+
+function goToday(){
+  setDate(localDate(new Date()));
+}
+
+function setDate(date){
+  if(!date)return;
+  currentDate=date;
+  currentPage=1;
+  if(!db.days[currentDate])db.days[currentDate]=[];
+  document.getElementById("selectedDate").value=currentDate;
+  render();
+}
+
+document.getElementById("selectedDate").addEventListener("change",e=>{
+  setDate(e.target.value);
+});
+
+function resetDay(){
+  if(confirm("선택한 날짜의 모든 할 일을 초기화할까요?")){
+    db.days[currentDate]=getTasks().map(()=>makeTask());
+    currentPage=1;
+    persist();
+    render();
   }
 }
 
-/* 페이지 이동 */
-function changePage(direction) {
-  const nextPage = currentPage + direction;
-
-  if (nextPage < 1 || nextPage > getTotalPages()) {
+async function enableNotifications(){
+  if(!("Notification" in window)){
+    alert("이 브라우저에서는 알림을 지원하지 않아요.");
     return;
   }
-
-  currentPage = nextPage;
-  renderTasks();
-}
-
-/* 페이지 번호와 버튼 상태 */
-function updatePagination() {
-  const totalPages = getTotalPages();
-
-  document.getElementById("pageInfo").textContent =
-    `${currentPage} / ${totalPages}`;
-
-  document.getElementById("prevBtn").disabled =
-    currentPage <= 1;
-
-  document.getElementById("nextBtn").disabled =
-    currentPage >= totalPages;
-
-  document.getElementById("pagination").style.display =
-    totalPages > 1 ? "flex" : "none";
-}
-
-/* 전체 항목 기준 달성률 */
-function updateProgress() {
-  const completed = tasks.filter(task => task.done).length;
-  const percent = tasks.length
-    ? Math.round((completed / tasks.length) * 100)
-    : 0;
-
-  document.getElementById("percent").textContent =
-    percent + "%";
-
-  document.getElementById("progressBar").style.width =
-    percent + "%";
-
-  document.getElementById("clear").style.display =
-    percent === 100 && tasks.length > 0 ? "block" : "none";
-}
-
-/* 모든 페이지의 내용과 체크 상태 초기화
-   항목 개수는 유지 */
-function resetAll() {
-  if (confirm("모든 할 일 목록을 초기화하시겠습니까?")) {
-    tasks = tasks.map(() => ({
-      text: "",
-      done: false
-    }));
-
-    currentPage = 1;
-    save();
-    renderTasks();
+  try{
+    const permission=await Notification.requestPermission();
+    alert(permission==="granted"
+      ?"알림이 허용됐어요. 웹앱이 열려 있을 때 마감 시간을 확인합니다."
+      :"알림이 허용되지 않았어요. 브라우저 설정을 확인해 주세요.");
+  }catch(e){
+    alert("알림 권한을 설정할 수 없어요. HTTPS 주소에서 열어 주세요.");
   }
 }
 
-/* 날짜에 따라 응원 문구 변경 */
-function dailyMessage() {
-  const start = new Date(2026, 0, 1);
-  const now = new Date();
+function checkDeadlines(){
+  if(!("Notification" in window)||Notification.permission!=="granted")return;
+  const now=Date.now();
+  let changed=false;
 
-  const day = Math.floor(
-    (new Date(now.getFullYear(), now.getMonth(), now.getDate()) -
-     start) / 86400000
-  );
+  Object.entries(db.days).forEach(([date,tasks])=>{
+    tasks.forEach(task=>{
+      if(task.done||!task.due||task.notified)return;
+      const dueTime=new Date(task.due).getTime();
+      if(Number.isFinite(dueTime)&&dueTime<=now){
+        try{
+          new Notification("할 일 마감 알림",{
+            body:`${task.text||"할 일"} (${date})`,
+            tag:"todo-"+task.id
+          });
+          task.notified=true;
+          changed=true;
+        }catch(e){}
+      }
+    });
+  });
 
-  const index =
-    ((day % messages.length) + messages.length) % messages.length;
-
-  document.getElementById("message").textContent =
-    "“" + messages[index] + "”";
+  if(changed){
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(db));}catch(e){}
+  }
 }
 
-updateDateTime();
-setInterval(updateDateTime, 1000);
+function exportBackup(){
+  try{
+    const blob=new Blob([JSON.stringify(db,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download=`yumin-todo-backup-${localDate(new Date())}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){
+    alert("백업 파일을 만들지 못했어요.");
+  }
+}
 
+document.getElementById("backupFile").addEventListener("change",async e=>{
+  const file=e.target.files[0];
+  if(!file)return;
+
+  try{
+    const imported=JSON.parse(await file.text());
+    if(!imported||!imported.days||typeof imported.days!=="object"||Array.isArray(imported.days)){
+      throw new Error("잘못된 백업 형식");
+    }
+
+    if(!confirm("현재 데이터를 백업 파일의 데이터로 교체할까요? 먼저 현재 데이터를 백업하는 것을 권장해요.")){
+      e.target.value="";
+      return;
+    }
+
+    const newDays={};
+    Object.entries(imported.days).forEach(([date,tasks])=>{
+      if(/^\d{4}-\d{2}-\d{2}$/.test(date)&&Array.isArray(tasks)){
+        newDays[date]=tasks.map(makeTask);
+      }
+    });
+
+    db={version:4,days:newDays};
+    if(!db.days[currentDate])db.days[currentDate]=[];
+    currentPage=1;
+    persist();
+    render();
+    alert("백업 데이터를 복구했어요.");
+  }catch(err){
+    alert("백업 파일을 읽지 못했어요. 올바른 JSON 파일인지 확인해 주세요.");
+  }
+  e.target.value="";
+});
+
+updateClock();
+setInterval(updateClock,1000);
 load();
-dailyMessage();
+updateMessage();
+checkDeadlines();
+setInterval(checkDeadlines,15000);
 </script>
-
 </body>
 </html>
