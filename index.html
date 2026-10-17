@@ -313,10 +313,43 @@ function renderTask(task,index,list){
       subCheck.type="checkbox";
       subCheck.checked=sub.done;
 
-      const subText=document.createElement("input");
-      subText.type="text";
-      subText.placeholder="세부 할 일 입력";
-      subText.value=sub.text;
+     
+const subText=document.createElement("input");
+subText.type="text";
+subText.placeholder="세부 할 일 입력";
+subText.value=sub.text;
+subText.dataset.subtaskId=sub.id;
+
+// Enter를 누르면 다음 세부 할 일 추가
+subText.addEventListener("keydown",e=>{
+  if(e.key!=="Enter") return;
+
+  e.preventDefault();
+
+  const newSub={
+    id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+    text:"",
+    done:false
+  };
+
+  const subIndex=task.subtasks.findIndex(s=>s.id===sub.id);
+  task.subtasks.splice(subIndex+1,0,newSub);
+
+  // 세부 할 일이 추가되면 상위 완료 상태 해제
+  task.done=false;
+  check.checked=false;
+  row.classList.remove("done");
+
+  persist();
+  render();
+
+  // 새로 추가된 세부 할 일 입력창에 커서 이동
+  const newInput=[...document.querySelectorAll(".subtask input[type=text]")]
+    .find(input=>input.dataset.subtaskId===newSub.id);
+
+  if(newInput) newInput.focus();
+});
+
 
       subCheck.addEventListener("change",()=>{
         sub.done=subCheck.checked;
