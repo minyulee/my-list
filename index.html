@@ -34,12 +34,14 @@ button:disabled{opacity:.3;cursor:default}
 .date-row button{flex-shrink:0}
 .list{display:flex;flex-direction:column}
 .task{border-bottom:2px solid #000;padding:12px 3px}
-.task-main{display:flex;align-items:center;gap:8px;width:100%}
+.task-main{display:flex;align-items:center;gap:6px;width:100%}
 .task input[type=checkbox]{width:20px;height:20px;accent-color:#000;flex-shrink:0}
-.task-title{min-width:80px;flex:1;border:0;outline:0;font-size:16px;background:#fff;color:#000}
+.task-title{min-width:60px;flex:1;border:0;outline:0;font-size:16px;background:#fff;color:#000}
 .task.done .task-title{text-decoration:line-through;color:#888}
-.sub-toggle-btn{flex-shrink:0;padding:5px 8px;font-size:12px}
-.due{font-size:12px;border:0;border-bottom:1px solid #aaa;padding:4px 0;background:#fff;flex-shrink:0;width:130px;max-width:35%}
+.sub-toggle-btn{flex-shrink:0;padding:5px 7px;font-size:12px}
+.due{font-size:12px;border:0;border-bottom:1px solid #aaa;padding:4px 0;background:#fff;flex-shrink:0;width:115px;max-width:30%}
+.delete-task-btn{border:0;background:none;color:#888;font-size:18px;font-weight:bold;padding:0 2px;flex-shrink:0;line-height:1}
+.delete-task-btn:hover{color:#000}
 .subtasks{margin:10px 0 4px 28px;padding-left:10px;border-left:2px solid #ddd;display:none}
 .subtasks.open{display:block}
 .subtask{display:flex;align-items:center;gap:8px;padding:4px 0}
@@ -60,10 +62,11 @@ button:disabled{opacity:.3;cursor:default}
 .container{padding:20px 12px}
 .date,.time{font-size:18px}
 .greeting{font-size:14px}
-.task-main{gap:6px}
-.task-title{font-size:15px;min-width:60px}
-.sub-toggle-btn{padding:4px 6px;font-size:11px}
-.due{font-size:11px;width:105px}
+.task-main{gap:4px}
+.task-title{font-size:15px;min-width:50px}
+.sub-toggle-btn{padding:4px 5px;font-size:11px}
+.due{font-size:11px;width:95px}
+.delete-task-btn{font-size:16px}
 }
 </style>
 </head>
@@ -340,7 +343,20 @@ function renderTask(task,index,list){
     persist();
   });
 
-  main.append(check,title,subBtn,due);
+  const delTaskBtn=document.createElement("button");
+  delTaskBtn.className="delete-task-btn";
+  delTaskBtn.textContent="−";
+  delTaskBtn.title="항목 삭제";
+  delTaskBtn.addEventListener("click",()=>{
+    if(confirm("이 할 일 항목을 삭제할까요?")){
+      db.days[currentDate]=getTasks().filter(t=>t.id!==task.id);
+      openSubtasks.delete(task.id);
+      persist();
+      render();
+    }
+  });
+
+  main.append(check,title,subBtn,due,delTaskBtn);
   row.append(main);
 
   const subList=document.createElement("div");
