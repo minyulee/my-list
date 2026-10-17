@@ -25,7 +25,10 @@ button{cursor:pointer}
 button:disabled{opacity:.3;cursor:default}
 .btn{background:#000;color:#fff;border:1px solid #000;padding:9px 12px;border-radius:5px;font-size:13px}
 .btn-light{background:#fff;color:#000;border:1px solid #000;padding:8px 10px;border-radius:5px;font-size:13px;white-space:nowrap}
-.button-row{justify-content:flex-end;flex-wrap:wrap;margin-bottom:15px}
+.button-row{justify-content:flex-end;gap:8px;margin-bottom:15px;position:relative}
+.menu-toggle-btn{background:#fff;color:#000;border:1px solid #000;padding:8px 12px;border-radius:5px;font-size:13px;font-weight:bold}
+.more-menu{display:none;align-items:center;gap:6px;flex-wrap:wrap}
+.more-menu.open{display:flex}
 .date-row{margin-bottom:20px;gap:6px}
 .date-row input{min-width:0;width:100%;border:1px solid #aaa;padding:9px;border-radius:4px}
 .date-row button{flex-shrink:0}
@@ -82,9 +85,12 @@ button:disabled{opacity:.3;cursor:default}
   <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
 
   <div class="button-row">
-    <button class="btn-light" onclick="enableNotifications()">알림 허용</button>
-    <button class="btn-light" onclick="exportBackup()">백업 저장</button>
-    <button class="btn-light" onclick="document.getElementById('backupFile').click()">백업 복구</button>
+    <div class="more-menu" id="moreMenu">
+      <button class="btn-light" onclick="enableNotifications()">알림 허용</button>
+      <button class="btn-light" onclick="exportBackup()">백업 저장</button>
+      <button class="btn-light" onclick="document.getElementById('backupFile').click()">백업 복구</button>
+    </div>
+    <button class="menu-toggle-btn" onclick="toggleMoreMenu()">•••</button>
     <button class="btn" onclick="resetDay()">Reset</button>
     <input class="file-input" id="backupFile" type="file" accept=".json,application/json">
   </div>
@@ -139,6 +145,11 @@ const messages=[
 "어설프게 공부하고 나에게 취하지 말자.",
 "원래 공부=멘헤라는 항등식이다."
 ];
+
+function toggleMoreMenu(){
+  const menu=document.getElementById("moreMenu");
+  menu.classList.toggle("open");
+}
 
 function localDate(d){
   const y=d.getFullYear();
@@ -299,7 +310,7 @@ function renderTask(task,index,list){
   const subBtn=document.createElement("button");
   subBtn.className="btn-light sub-toggle-btn";
   subBtn.textContent=`＋ 세부 할 일 (${task.subtasks.length})`;
-  
+  
   subBtn.addEventListener("click",()=>{
     if(openSubtasks.has(task.id)){
       if(task.subtasks.length===0){
