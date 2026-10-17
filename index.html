@@ -36,10 +36,10 @@ button:disabled{opacity:.3;cursor:default}
 .task{border-bottom:2px solid #000;padding:12px 3px}
 .task-main{display:flex;align-items:center;gap:6px;width:100%}
 .task input[type=checkbox]{width:20px;height:20px;accent-color:#000;flex-shrink:0}
-.task-title{min-width:60px;flex:1;border:0;outline:0;font-size:16px;background:#fff;color:#000}
+.task-title{min-width:50px;flex:1;border:0;outline:0;font-size:16px;background:#fff;color:#000}
 .task.done .task-title{text-decoration:line-through;color:#888}
 .sub-toggle-btn{flex-shrink:0;padding:5px 7px;font-size:12px}
-.due{font-size:12px;border:0;border-bottom:1px solid #aaa;padding:4px 0;background:#fff;flex-shrink:0;width:115px;max-width:30%}
+.due{font-size:11px;border:0;border-bottom:1px solid #aaa;padding:2px 0;background:#fff;flex-shrink:0;width:105px;line-height:1.2;text-align:right}
 .delete-task-btn{border:0;background:none;color:#888;font-size:18px;font-weight:bold;padding:0 2px;flex-shrink:0;line-height:1}
 .delete-task-btn:hover{color:#000}
 .subtasks{margin:10px 0 4px 28px;padding-left:10px;border-left:2px solid #ddd;display:none}
@@ -63,9 +63,9 @@ button:disabled{opacity:.3;cursor:default}
 .date,.time{font-size:18px}
 .greeting{font-size:14px}
 .task-main{gap:4px}
-.task-title{font-size:15px;min-width:50px}
+.task-title{font-size:15px;min-width:40px}
 .sub-toggle-btn{padding:4px 5px;font-size:11px}
-.due{font-size:11px;width:95px}
+.due{font-size:10px;width:90px}
 .delete-task-btn{font-size:16px}
 }
 </style>
@@ -312,7 +312,7 @@ function renderTask(task,index,list){
 
   const subBtn=document.createElement("button");
   subBtn.className="btn-light sub-toggle-btn";
-  subBtn.textContent=`＋ 세부 할 일 (${task.subtasks.length})`;
+  subBtn.textContent=task.subtasks.length>0?`＋ 세부 할 일 (${task.subtasks.length})`:`＋ 세부 할 일`;
   
   subBtn.addEventListener("click",()=>{
     if(openSubtasks.has(task.id)){
